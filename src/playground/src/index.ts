@@ -1,9 +1,22 @@
 import './main.css';
 import * as monaco from 'monaco-editor';
+import { inflate, deflate } from 'pako';
 import exampleFile from '../../../docs/examples/101/1vm-2nics-2subnets-1vnet/main.bicep';
 var buildVersion = require('../package.json').version;
 
 document.title = `${document.title} ${buildVersion}`;
+document.body.removeAttribute('style');
+
+let initialValue = exampleFile;
+try {
+  const rawHash = window.location.hash.substr(1);
+  history.replaceState(null, null, ' ');
+  const hashContents = inflate(atob(rawHash), { to: 'string' });
+  if (hashContents) {
+    initialValue = hashContents;
+  }
+} catch {
+}
 
 self['MonacoEnvironment'] = {
   getWorkerUrl: function (moduleId, label) {
@@ -27,14 +40,14 @@ self['BicepInitialize'] = (interop) => {
     releaseDocumentSemanticTokens: () => { }
   });
 
-  const editorLhs = monaco.editor.create(document.getElementById('editor_lhs'), {
+  const editorLhs = monaco.editor.create(document.getElementById('editor-lhs'), {
     theme: 'vs-dark',
     automaticLayout: true,
     language: 'bicep',
     minimap: {
       enabled: false,
     },
-    value: exampleFile,
+    value: initialValue,
     // @ts-expect-error
     'semanticHighlighting.enabled': true
   });
@@ -80,7 +93,7 @@ self['BicepInitialize'] = (interop) => {
     }
   };
 
-  const editorRhs = monaco.editor.create(document.getElementById('editor_rhs'), {
+  const editorRhs = monaco.editor.create(document.getElementById('editor-rhs'), {
     theme: 'vs-dark',
     automaticLayout: true,
     language: 'json',
@@ -101,5 +114,28 @@ self['BicepInitialize'] = (interop) => {
   editorLhs.onDidChangeModelContent(e => compileAndEmitDiagnostics());
   compileAndEmitDiagnostics();
 
-  document.getElementById('loader').style.display = 'none';
+  setupCopyHandler(
+    document.getElementById('btn-share'),
+    () => editorLhs.getModel().getValue()
+  );
+
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('container').classList.remove('hidden');
+}
+
+function setupCopyHandler(shareButton: HTMLElement, getContent: () => string) {
+  const shareText = shareButton.textContent;
+  shareButton.addEventListener('click', () => {
+    document.addEventListener('copy', function onCopy(e: ClipboardEvent) {
+      const contentHash = btoa(deflate(getContent(), { to: 'string' }));
+      e.clipboardData.setData('text/plain', `https://aka.ms/bicepdemo#${contentHash}`);
+      e.preventDefault();
+      document.removeEventListener('copy', onCopy, true);
+    });
+
+    document.execCommand('copy');
+
+    setTimeout(() => shareButton.textContent = shareText, 2000);
+    shareButton.textContent = 'copied!'
+  });
 }

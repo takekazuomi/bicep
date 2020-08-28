@@ -4,20 +4,25 @@ html, body {
   margin: 0;
   overflow: hidden;
   background-color: #1e1e1e;
+  font-family: sans-serif;
 }
 
-.container {
+.hidden {
+  display: none;
+}
+
+#editors {
   height: 100vh;
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
 }
 
-.left-half {
+#editor-lhs {
   grid-column: 1;
 }
 
-.right-half {
+#editor-rhs {
   grid-column: 2;
 }
 
@@ -38,4 +43,23 @@ html, body {
   border: 0.2em solid #333;
   border-top-color: #fff;
   animation: spinner 1s linear infinite;
+}
+
+#btn-share {
+  position: fixed;
+  padding: 0.5em;
+  bottom: 1em;
+  right: 1em;
+  background-color: #6175d8;
+  color: #e4e4e4;
+  border-radius: 0.75em;
+  text-align: center;
+  box-shadow: 0 0 0.2em #888;
+  user-select: none;
+}
+
+#btn-share:hover {
+  background-color:#8196ff;
+  color: #ffffff;
+  cursor: pointer;
 }
