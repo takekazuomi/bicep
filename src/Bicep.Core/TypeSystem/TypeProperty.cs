@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+
 namespace Bicep.Core.TypeSystem
 {
-    public class TypeProperty
+    public class TypeProperty : ITypeProperty
     {
         public TypeProperty(string name, TypeSymbol type, TypePropertyFlags flags = TypePropertyFlags.None)
         {
