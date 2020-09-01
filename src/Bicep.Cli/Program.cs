@@ -13,6 +13,8 @@ using Bicep.Core.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Bicep.Cli.CommandLine.Arguments;
+using Bicep.Decompiler;
+using System.Text;
 
 namespace Bicep.Cli
 {
@@ -30,7 +32,53 @@ namespace Bicep.Cli
         public static int Main(string[] args)
         {
             var program = new Program(Console.Out, Console.Error);
+
+            if (args[0] == "decompile")
+            {
+                // TODO implement this properly
+                return program.Decompile(args[1..]);
+            }
+
             return program.Run(args);
+        }
+
+        public int Decompile(string[] files)
+        {
+            var hadErrors = false;
+            using (var loggerFactory = CreateLoggerFactory())
+            {
+                var logger = new BicepDiagnosticLogger(loggerFactory.CreateLogger("bicep"));
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        var jsonInput = File.ReadAllText(file);
+                        var outputFile = Path.ChangeExtension(file, "bicep");
+
+                        var program = TemplateConverter.DecompileTemplate(jsonInput);
+                        var bicepOutput = PrintVisitor.Print(program);
+
+                        var compilation = new Compilation(SyntaxFactory.CreateFromText(bicepOutput));
+                        var diagnostics = compilation.GetSemanticModel().GetAllDiagnostics().ToArray();
+
+                        File.WriteAllText(outputFile, bicepOutput);
+
+                        var lineStarts = TextCoordinateConverter.GetLineStarts(bicepOutput);
+                        foreach (var diagnostic in diagnostics)
+                        {
+                            logger.LogDiagnostic(outputFile, diagnostic, lineStarts);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        this.errorWriter.WriteLine($"Decompilation failed for '{file}'");
+                        this.errorWriter.WriteLine(exception.Message);
+                        hadErrors = true;
+                    }
+                }
+            }
+
+            return hadErrors ? 1 : 0;
         }
 
         public int Run(string[] args)
