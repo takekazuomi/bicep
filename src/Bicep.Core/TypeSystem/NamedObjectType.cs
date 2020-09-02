@@ -8,20 +8,17 @@ namespace Bicep.Core.TypeSystem
 {
     public class NamedObjectType : ObjectType
     {
-        public NamedObjectType(string name, IEnumerable<ITypeProperty> properties, TypeSymbol? additionalPropertiesType, TypePropertyFlags additionalPropertiesFlags = TypePropertyFlags.None)
+        public NamedObjectType(string name, IEnumerable<ITypeProperty> properties, ITypeProperty? additionalProperties)
             : base(name)
         {
             this.Properties = properties.ToImmutableDictionary(property => property.Name, property => property, LanguageConstants.IdentifierComparer);
-            this.AdditionalPropertiesType = additionalPropertiesType;
-            this.AdditionalPropertiesFlags = additionalPropertiesFlags;
+            this.AdditionalProperties = additionalProperties;
         }
 
         public override TypeKind TypeKind => TypeKind.NamedObject;
 
         public override ImmutableDictionary<string, ITypeProperty> Properties { get; }
 
-        public override TypeSymbol? AdditionalPropertiesType { get; }
-
-        public override TypePropertyFlags AdditionalPropertiesFlags { get; }
+        public override ITypeProperty? AdditionalProperties { get; }
     }
 }

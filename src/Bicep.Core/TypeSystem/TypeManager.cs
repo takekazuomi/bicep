@@ -12,7 +12,6 @@ using Bicep.Core.Parser;
 using Bicep.Core.Resources;
 using Bicep.Core.SemanticModel;
 using Bicep.Core.Syntax;
-using Bicep.Resources.Types;
 
 namespace Bicep.Core.TypeSystem
 {
@@ -161,7 +160,7 @@ namespace Bicep.Core.TypeSystem
             if (@string.IsInterpolated() == false)
             {
                 // uninterpolated strings have a known type
-                return LanguageConstants.String;
+                return new StringLiteralType(@string.StringTokens.Single().Text);
             }
 
             var errors = new List<ErrorDiagnostic>();
@@ -203,7 +202,7 @@ namespace Bicep.Core.TypeSystem
                 .Select(group => new TypeProperty(group.Key, UnionType.Create(group.Select(p => this.GetTypeInfoInternal(context, p.Value)))));
 
             // TODO: Add structural naming?
-            return new NamedObjectType(LanguageConstants.Object.Name, properties, additionalPropertiesType: null);
+            return new NamedObjectType(LanguageConstants.Object.Name, properties, additionalProperties: null);
         }
 
         private TypeSymbol GetArrayType(TypeManagerContext context, ArraySyntax array)
@@ -273,7 +272,7 @@ namespace Bicep.Core.TypeSystem
                 return LanguageConstants.Any;
             }
 
-            if (baseType.Properties.Any() || baseType.AdditionalPropertiesType != null)
+            if (baseType.Properties.Any() || baseType.AdditionalProperties != null)
             {
                 // the object type allows properties
                 return LanguageConstants.Any;
@@ -311,10 +310,10 @@ namespace Bicep.Core.TypeSystem
 
             // the property is not declared
             // check additional properties
-            if (baseType.AdditionalPropertiesType != null)
+            if (baseType.AdditionalProperties != null)
             {
                 // yes - return the additional property type
-                return baseType.AdditionalPropertiesType;
+                return baseType.AdditionalProperties.Type;
             }
 
             return new ErrorTypeSymbol(DiagnosticBuilder.ForPosition(propertyExpressionPositionable).UnknownProperty(baseType, propertyName));

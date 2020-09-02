@@ -31,7 +31,7 @@ namespace Bicep.Core.TypeSystem
                 return accessor();
             }
 
-            return new ResourceType(typeReference.FullyQualifiedType, LanguageConstants.TopLevelResourceProperties, additionalPropertiesType: null, typeReference);
+            return new ResourceType(typeReference.FullyQualifiedType, LanguageConstants.TopLevelResourceProperties, additionalProperties: null, typeReference);
         }
     }
 }

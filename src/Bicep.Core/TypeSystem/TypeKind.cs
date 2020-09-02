@@ -38,5 +38,10 @@ namespace Bicep.Core.TypeSystem
         /// Union of multiple types.
         /// </summary>
         Union,
+
+        /// <summary>
+        /// Literal type.
+        /// </summary>
+        Literal,
     }
 }

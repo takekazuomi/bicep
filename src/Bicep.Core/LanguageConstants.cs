@@ -38,9 +38,9 @@ namespace Bicep.Core
         public static readonly TypeSymbol Array = new ArrayType("array");
 
         // declares the description property but also allows any other property of any type
-        public static readonly TypeSymbol ParameterModifierMetadata = new NamedObjectType(nameof(ParameterModifierMetadata), CreateParameterModifierMetadataProperties(), Any, TypePropertyFlags.Constant);
+        public static readonly TypeSymbol ParameterModifierMetadata = new NamedObjectType(nameof(ParameterModifierMetadata), CreateParameterModifierMetadataProperties(), new TypeProperty("additionalProperties", Any, TypePropertyFlags.Constant));
 
-        public static readonly TypeSymbol Tags = new NamedObjectType(nameof(Tags), Enumerable.Empty<ITypeProperty>(), String);
+        public static readonly TypeSymbol Tags = new NamedObjectType(nameof(Tags), Enumerable.Empty<ITypeProperty>(), new TypeProperty("additionalProperties", String, TypePropertyFlags.None));
 
         public static readonly ImmutableArray<ITypeProperty> TopLevelResourceProperties = CreateResourceProperties().ToImmutableArray();
 
@@ -56,7 +56,7 @@ namespace Bicep.Core
                 throw new ArgumentException($"Modifiers are not supported for type '{parameterType.Name}'.");
             }
 
-            return new NamedObjectType($"ParameterModifier_{parameterType.Name}", CreateParameterModifierProperties(parameterType), additionalPropertiesType: null);
+            return new NamedObjectType($"ParameterModifier_{parameterType.Name}", CreateParameterModifierProperties(parameterType), additionalProperties: null);
         }
 
         private static IEnumerable<ITypeProperty> CreateParameterModifierProperties(TypeSymbol parameterType)

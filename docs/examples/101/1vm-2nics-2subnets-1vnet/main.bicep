@@ -18,7 +18,7 @@ var networkSecurityGroupName = 'NSG'
 var networkSecurityGroupName2 = concat(subnet2Name, '-nsg')
 
 // This is the virtual machine that you're building.
-resource vm 'Microsoft.Compute/virtualMachines@2017-03-30' = {
+resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
   name: virtualMachineName
   location: location
   properties: {
