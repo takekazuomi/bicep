@@ -43,5 +43,10 @@ namespace Bicep.Core.TypeSystem
         /// Literal type.
         /// </summary>
         Literal,
+
+        /// <summary>
+        /// Discriminated object type.
+        /// </summary>
+        DiscriminatedObject,
     }
 }

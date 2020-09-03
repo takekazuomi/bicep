@@ -83,6 +83,14 @@ namespace Bicep.Core.TypeSystem
                     // this function does not validate item types
                     return true;
 
+                case DiscriminatedObjectType targetDiscriminated when sourceType is DiscriminatedObjectType sourceDiscriminated:
+                    // validation left for later
+                    return true;
+
+                case DiscriminatedObjectType targetDiscriminated:
+                    // validation left for later
+                    return true;
+
                 case UnionType targetUnion when sourceType is UnionType sourceUnion:
                     // union types are guaranteed to be flat
                     
@@ -141,6 +149,11 @@ namespace Bicep.Core.TypeSystem
                 return errors.Concat(GetObjectAssignmentDiagnostics(typeManager, objectValue, targetObjectType, skipConstantCheck));
             }
 
+            if (expression is ObjectSyntax objectDiscriminated && targetType is DiscriminatedObjectType targetDiscriminated)
+            {
+                return errors.Concat(GetDiscriminatedObjectAssignmentDiagnostics(typeManager, objectDiscriminated, targetDiscriminated, skipConstantCheck));
+            }
+
             // array assignability check
             if (expression is ArraySyntax arrayValue && targetType is ArrayType targetArrayType)
             {
@@ -167,6 +180,48 @@ namespace Bicep.Core.TypeSystem
                     (expectedType, actualType, errorExpression) => DiagnosticBuilder.ForPosition(errorExpression).ArrayTypeMismatch(expectedType.Name, actualType.Name),
                     skipConstantCheck,
                     skipTypeErrors: true)); 
+        }
+
+        private static IEnumerable<ErrorDiagnostic> GetDiscriminatedObjectAssignmentDiagnostics(ITypeManager typeManager, ObjectSyntax expression, DiscriminatedObjectType targetType, bool skipConstantCheck)
+        {
+            // TODO: Short-circuit on any object to avoid unnecessary processing?
+            // TODO: Consider doing the schema check even if there are parse errors
+            // if we have parse errors, there's no point to check assignability
+            // we should not return the parse errors however because they will get double collected
+            if (expression.HasParseErrors())
+            {
+                yield break;
+            }
+
+            var propertyMap = expression.ToPropertyDictionary();
+            
+            var objectTypes = targetType.GetExtendedPropertyTypes();
+
+            if (!propertyMap.TryGetValue(targetType.DiscriminatorKey, out var discriminatorProperty))
+            {
+                // object doesn't contain the discriminator field
+                yield return DiagnosticBuilder.ForPosition(expression).MissingDiscriminator(targetType.DiscriminatorKey, objectTypes.Select(x => x.Properties[targetType.DiscriminatorKey].Type));
+                yield break;
+            }
+
+            var discriminatorType = typeManager.GetTypeInfo(discriminatorProperty.Value, new TypeManagerContext());
+
+            foreach (var objectType in objectTypes)
+            {
+                if (AreTypesAssignable(discriminatorType, objectType.Properties[targetType.DiscriminatorKey]?.Type) == true)
+                {
+                    // we have a match!
+                    foreach (var diagnostic in GetObjectAssignmentDiagnostics(typeManager, expression, objectType, skipConstantCheck))
+                    {
+                        yield return diagnostic;
+                    }
+                    yield break;
+                }
+            }
+
+            // no matches
+            yield return DiagnosticBuilder.ForPosition(discriminatorProperty.Value).FailedToMatchDiscriminator(targetType.DiscriminatorKey, objectTypes.Select(x => x.Properties[targetType.DiscriminatorKey].Type));
+            yield break;
         }
 
         private static IEnumerable<ErrorDiagnostic> GetObjectAssignmentDiagnostics(ITypeManager typeManager, ObjectSyntax expression, ObjectType targetType, bool skipConstantCheck)
