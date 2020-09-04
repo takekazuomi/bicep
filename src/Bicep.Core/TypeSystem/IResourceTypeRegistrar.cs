@@ -10,5 +10,7 @@ namespace Bicep.Core.TypeSystem
         void RegisterType(ResourceTypeReference resourceType, Func<ResourceType> accessor);
 
         ResourceType LookupType(ResourceTypeReference reference);
+
+        bool HasTypeDefined(ResourceTypeReference typeReference);
     }
 }

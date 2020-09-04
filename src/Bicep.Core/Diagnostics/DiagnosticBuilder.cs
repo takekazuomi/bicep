@@ -206,10 +206,10 @@ namespace Bicep.Core.Diagnostics
                 "BCP036",
                 $"The property '{property}' expected a value of type {expectedType} but the provided value is of type {actualType}.");
 
-            public ErrorDiagnostic DisallowedProperty(object property, object type) => new ErrorDiagnostic(
+            public ErrorDiagnostic DisallowedProperty(object property, object type, IEnumerable<string> validUnspecifiedProperties) => new ErrorDiagnostic(
                 TextSpan,
                 "BCP037",
-                $"The property '{property}' is not allowed on objects of type {type}.");
+                $"The property '{property}' is not allowed on objects of type {type}." + (validUnspecifiedProperties.Any() ? $" Permissible properties include '{validUnspecifiedProperties.ConcatString("', '")}'." : ""));
 
             public ErrorDiagnostic InvalidExpression() => new ErrorDiagnostic(
                 TextSpan,
@@ -264,10 +264,10 @@ namespace Bicep.Core.Diagnostics
                 "BCP049",
                 $"The array index must be of type {LanguageConstants.String} or {LanguageConstants.Int} but the provided index was of type {wrongType}.");
 
-            public ErrorDiagnostic UnknownProperty(TypeSymbol type, string badProperty) => new ErrorDiagnostic(
+            public ErrorDiagnostic UnknownProperty(TypeSymbol type, string badProperty, IEnumerable<string> availableProperties) => new ErrorDiagnostic(
                 TextSpan,
                 "BCP053",
-                $"The type {type} does not contain property '{badProperty}'.");
+                $"The type {type} does not contain property '{badProperty}'." + (availableProperties.Any() ? $" Available properties include '{availableProperties.ConcatString("', '")}'." : ""));
 
             public ErrorDiagnostic NoPropertiesAllowed(TypeSymbol type) => new ErrorDiagnostic(
                 TextSpan,

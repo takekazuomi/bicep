@@ -33,5 +33,8 @@ namespace Bicep.Core.TypeSystem
 
             return new ResourceType(typeReference.FullyQualifiedType, LanguageConstants.TopLevelResourceProperties, additionalProperties: null, typeReference);
         }
+
+        public bool HasTypeDefined(ResourceTypeReference typeReference)
+            => ResourceAccessors.ContainsKey(typeReference);
     }
 }

@@ -316,7 +316,7 @@ namespace Bicep.Core.TypeSystem
                 return baseType.AdditionalProperties.Type;
             }
 
-            return new ErrorTypeSymbol(DiagnosticBuilder.ForPosition(propertyExpressionPositionable).UnknownProperty(baseType, propertyName));
+            return new ErrorTypeSymbol(DiagnosticBuilder.ForPosition(propertyExpressionPositionable).UnknownProperty(baseType, propertyName, baseType.Properties.Select(p => p.Key)));
         }
 
         private TypeSymbol GetArrayAccessType(TypeManagerContext context, ArrayAccessSyntax syntax)
