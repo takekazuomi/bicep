@@ -2,13 +2,19 @@
 
 Let's take another look at our storage account. As we discussed earlier, the resource declaration includes a **symbolic name**, which is separate from the name of the resource that will be created. The symbolic name is simply a reference to the resource within bicep, and it is a very useful pointer for retrieving properties of a resource and in turn keeping your syntax readable and easy to manage.
 
+ストレージアカウントをもう一度見てみましょう。先ほど説明したように、リソースの宣言には **symbolic name** が含まれており、これは作成されるリソースの名前とは別のものです。シンボリック名は単にbicep内のリソースへの参照であり、リソースのプロパティを取得するための非常に便利なポインタであり、ひいては構文を読みやすく管理しやすくしてくれます。
+
 ## Retrieving the resource ID
 
 Instead of using the `resourceId()` function, you can simply use the identifier and retrieve the relevant property. We've already done this with our output `stg.id`. In ARM Template JSON this will compile to `[resourceId('Microsoft.Storage/storageAccounts', parameters('name'))]`.
 
+関数 `resourceId()` を使う代わりに、単に識別子を使って関連するプロパティを取得することができます。これはすでに出力された `stg.id` で行っています。ARMテンプレートJSONでは、これは `[resourceId('Microsoft.Storage/storageAccounts', parameters('name'))]` にコンパイルされます。
+
 ## Retrieving other "compile time" properties
 
 Bicep special cases a few properties for which it will use the "compile-time" value. These include:
+
+Bicepは、"compile-time" の値を使用するいくつかのプロパティを特別に扱います。これらには以下が含まれます。
 
 * `id`
 * `name`
