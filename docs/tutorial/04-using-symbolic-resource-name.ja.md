@@ -23,6 +23,8 @@ Bicepは、"compile-time" の値を使用するいくつかのプロパティを
 
 To test this, we can add another `output` with the storage account name, which is useful to know since that `uniqueString` will be generated when the template is deployed.
 
+これをテストするために、ストレージアカウント名を使用して別の `output`を追加します。これは、テンプレートのデプロイ時に`uniqueString`が生成されるため、知っておくと役立ちます。
+
 ```
 param location string = resourceGroup().location
 param namePrefix string = 'stg'
@@ -46,9 +48,13 @@ output computedStorageName string = stg.name
 
 You may find you need properties other properties like `apiVersion` for functions like [list*](https://docs.microsoft.com/azure/azure-resource-manager/templates/template-functions-resource#list).
 
+[list*](https://docs.microsoft.com/azure/azure-resource-manager/templates/template-functions-resource#list)のような関数には、`apiVersion`のようなプロパティが必要になるかもしれません。
+
 ## Retrieving "run-time" properties
 
 In ARM Templates, I use the `reference()` function to retrieve run-time properties that only exist after the resource has been created. In a storage account, the `primaryEndpoints` property is one of those. Let's add another output to retrieve this run-time property:
+
+ARMテンプレートでは、リソースが作成された後にのみ存在するランタイムプロパティを取得するために `reference()` 関数を使用します。ストレージアカウントでは、`primaryEndpoints` プロパティがその一つです。このランタイムプロパティを取得するために、別の出力を追加してみましょう。
 
 ```
 param location string = resourceGroup().location
@@ -73,6 +79,8 @@ output blobEndpoint string = stg.properties.primaryEndpoints.blob // replacement
 ```
 
 When we compile, we see the ARM template is correctly using the `reference()` function:
+
+コンパイルすると、ARMテンプレートが `reference()` 関数を正しく使用していることがわかります。
 
 ```json
 {
@@ -129,7 +137,11 @@ When we compile, we see the ARM template is correctly using the `reference()` fu
 
 In ARM Templates today, you must manually specify resource dependencies with the `dependsOn` property. If we want to create a blob container in our storage account, we need to make sure the storage account gets created first. With bicep, if you reference any property of the resource via the symbolic name, **we will automatically add the dependsOn property**.
 
+今日のARMテンプレートでは、`dependsOn`プロパティでリソースの依存関係を手動で指定する必要があります。ストレージアカウントにブロブコンテナを作成したい場合は、ストレージアカウントが最初に作成されることを確認する必要があります。bicepでは、シンボリック名を介してリソースの任意のプロパティを参照すると、**we will automatically add the dependsOn property** が追加されます。
+
 Let's add a new resource for our blob container to our storage account, and reference the `name` property via symbolic name (`stg.name`):
+
+blobコンテナ用の新しいリソースをストレージアカウントに追加し、シンボリック名 (`stg.name`) で `name` プロパティを参照してみましょう。
 
 ```
 param location string = resourceGroup().location
@@ -159,6 +171,9 @@ output primaryEndpoint string = stg.properties.primaryEndpoints.blob // replacem
 ```
 
 We can see in our compiled ARM Template that the `dependsOn` is correctly added to the child resource.
+
+コンパイルしたARMテンプレートでは、`dependsOn` が子リソースに正しく追加されていることがわかります。
+
 
 ```json
 {
@@ -222,5 +237,7 @@ We can see in our compiled ARM Template that the `dependsOn` is correctly added 
 ## Next steps
 
 In the final tutorial, we will learn how to convert an arbitrary ARM template into a bicep file:
+
+最後のチュートリアルでは、任意のARMテンプレートをbicepファイルに変換する方法を学びます。
 
 [5 - Convert any ARM template into a Bicep file](./05-convert-arm-template.md)
